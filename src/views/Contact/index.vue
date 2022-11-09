@@ -1,6 +1,5 @@
 <script setup>
 import { ref, watch } from "vue";
-import { RouterLink } from "vue-router";
 const value = ref("");
 const dataSource = ref(JSON.parse(localStorage.getItem("goods") ?? "[]"));
 const list = ref(dataSource.value);
@@ -18,7 +17,7 @@ const deleteGoods = (index) => {
 </script>
 
 <template>
-  <van-nav-bar title="全部商品" />
+  <van-nav-bar title="全部联系人" />
   <van-search v-model="value" placeholder="请输入搜索关键词" />
   <van-list class="goods-list">
     <van-swipe-cell v-for="(item, index) in list" :key="item">
@@ -33,9 +32,9 @@ const deleteGoods = (index) => {
       </template>
     </van-swipe-cell>
   </van-list>
-  <RouterLink to="/create">
+  <!-- <RouterLink to="/goods/create">
     <van-button class="add-button" icon="plus" type="primary" />
-  </RouterLink>
+  </RouterLink> -->
 </template>
 
 <style>
@@ -44,7 +43,7 @@ const deleteGoods = (index) => {
   width: 40px;
   height: 40px;
   position: fixed;
-  bottom: 30px;
+  bottom: 80px;
   right: 30px;
 }
 
@@ -52,3 +51,4 @@ const deleteGoods = (index) => {
   margin-top: 1px;
 }
 </style>
+ƒ
