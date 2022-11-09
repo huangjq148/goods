@@ -1,7 +1,9 @@
 <script setup>
 import { ref, watch } from "vue";
+import { getList, subListItem } from "@/utils/storage"
+
 const value = ref("");
-const dataSource = ref(JSON.parse(localStorage.getItem("goods") ?? "[]"));
+const dataSource = ref(getList("persons"));
 const list = ref(dataSource.value);
 
 watch(value, (newValue) => {
@@ -10,9 +12,14 @@ watch(value, (newValue) => {
   );
 });
 
-const deleteGoods = (index) => {
-  dataSource.value.splice(index, 1);
-  localStorage.setItem("goods", JSON.stringify(dataSource.value));
+watch(dataSource, (newValue) => {
+  list.value = newValue.filter(
+    (item) => item.name.indexOf(value.value) > -1
+  );
+});
+
+const deletePerson = (index) => {
+  dataSource.value = subListItem("persons", index)
 };
 </script>
 
@@ -21,14 +28,9 @@ const deleteGoods = (index) => {
   <van-search v-model="value" placeholder="请输入搜索关键词" />
   <van-list class="goods-list">
     <van-swipe-cell v-for="(item, index) in list" :key="item">
-      <van-cell :border="true" :title="item.name" :value="item.price" />
+      <van-cell :border="true" :title="item.name" :value="item.address" />
       <template #right>
-        <van-button
-          @click="() => deleteGoods(index)"
-          square
-          type="danger"
-          text="删除"
-        />
+        <van-button @click="() => deletePerson(index)" square type="danger" text="删除" />
       </template>
     </van-swipe-cell>
   </van-list>

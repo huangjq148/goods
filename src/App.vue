@@ -13,4 +13,6 @@ const active = ref(0);
   </van-tabbar>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+</style>
