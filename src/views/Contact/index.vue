@@ -1,6 +1,11 @@
+<script>
+export default {
+  name: "ContactList",
+};
+</script>
 <script setup>
 import { ref, watch } from "vue";
-import { getList, subListItem } from "@/utils/storage"
+import { getList, subListItem } from "@/utils/storage";
 
 const value = ref("");
 const dataSource = ref(getList("persons"));
@@ -13,13 +18,11 @@ watch(value, (newValue) => {
 });
 
 watch(dataSource, (newValue) => {
-  list.value = newValue.filter(
-    (item) => item.name.indexOf(value.value) > -1
-  );
+  list.value = newValue.filter((item) => item.name.indexOf(value.value) > -1);
 });
 
 const deletePerson = (index) => {
-  dataSource.value = subListItem("persons", index)
+  dataSource.value = subListItem("persons", index);
 };
 </script>
 
@@ -30,7 +33,12 @@ const deletePerson = (index) => {
     <van-swipe-cell v-for="(item, index) in list" :key="item">
       <van-cell :border="true" :title="item.name" :value="item.address" />
       <template #right>
-        <van-button @click="() => deletePerson(index)" square type="danger" text="删除" />
+        <van-button
+          @click="() => deletePerson(index)"
+          square
+          type="danger"
+          text="删除"
+        />
       </template>
     </van-swipe-cell>
   </van-list>

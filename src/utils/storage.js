@@ -1,22 +1,31 @@
-import { uniqWith, isEqual } from "lodash-es"
+import { uniqWith, isEqual } from "lodash-es";
+
+export const getList = (key) => JSON.parse(localStorage.getItem(key) || "[]");
+
+export const storeData = (key, data) => localStorage.setItem(key, JSON.stringify(data));
 
 export const addList = (key, data, isUniq) => {
-  const allData = JSON.parse(localStorage.getItem(key) || "[]");
-  let storeData
+  const allData = getList(key);
+  let result;
   allData.push(data);
-  storeData = JSON.stringify(allData)
+  result = allData;
   if (isUniq) {
-    storeData = JSON.stringify(uniqWith(allData, isEqual))
+    result = uniqWith(allData, isEqual);
   }
-  localStorage.setItem(key, storeData);
+  storeData(key, result);
   return allData;
 };
 
 export const subListItem = (key, index) => {
-  const allData = JSON.parse(localStorage.getItem(key) || "[]");
+  const allData = getList(key);
   allData.splice(index, 1);
-  localStorage.setItem(key, JSON.stringify(allData));
+  storeData(key, allData);
   return allData;
-}
+};
 
-export const getList = (key) => JSON.parse(localStorage.getItem(key) || "[]")
+export const updateItem = (key, index, data) => {
+  const allData = getList(key);
+  allData[index] = data;
+  storeData(key, allData);
+  return allData;
+};
