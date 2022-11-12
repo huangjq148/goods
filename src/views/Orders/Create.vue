@@ -47,7 +47,7 @@ const handlePersonPick = (value, index) => {
 };
 
 const formatDate = (date) =>
-  `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+  `${date.getYear() - 100}/${date.getMonth() + 1}/${date.getDate()}`;
 
 const handleDatePick = (value) => {
   calendarShow.value = false;
@@ -143,6 +143,6 @@ onMounted(() => {
 .form {
   margin-top: 20px;
   height: calc(100vh - 70px - 50px);
-  overflow: scroll;
+  overflow: auto;
 }
 </style>

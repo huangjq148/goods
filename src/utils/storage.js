@@ -16,7 +16,7 @@ export const getById = (key, id) => {
 // 增
 export const create = (key, data) => {
   const allData = getList(key);
-  const id = dayjs().format("YYYYMMDDHHmmss")
+  const id = dayjs().format("YYMMDDHHmmss")
 
   allData.unshift({ ...data, id });
   storeData(key, allData);

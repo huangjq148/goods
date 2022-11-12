@@ -4,9 +4,9 @@ export default {
 };
 </script>
 <script setup>
-import { ref, computed } from "vue";
-import { RouterLink, useRouter } from "vue-router";
 import { getList, remove } from "@/utils/storage";
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 
 const value = ref("");
 const dataSource = ref(getList("goods"));
@@ -28,11 +28,11 @@ const jumpToEdit = (id) => {
 <template>
   <van-nav-bar title="全部商品" />
   <van-search v-model="value" placeholder="请输入搜索关键词" />
-  <van-list class="goods-list">
+  <van-empty description="没有数据" v-if="!showData.length" />
+  <van-list class="goods-list" v-else>
     <van-swipe-cell v-for="(item, index) in showData" :key="item">
       <van-cell :title="item.name" @click="() => jumpToEdit(item.id)">
         进价：{{ item.buyPrice }}
-        <br />
         售价：{{ item.sellPrice }}
       </van-cell>
       <template #right>
@@ -40,9 +40,7 @@ const jumpToEdit = (id) => {
       </template>
     </van-swipe-cell>
   </van-list>
-  <RouterLink to="/goods/create">
-    <van-button class="add-button" icon="plus" type="primary" />
-  </RouterLink>
+  <van-button to="/goods/create" class="add-button" icon="plus" type="primary" />
 </template>
 
 <style>
@@ -58,6 +56,6 @@ const jumpToEdit = (id) => {
 .goods-list {
   margin-top: 1px;
   height: calc(100vh - 50px - 100px);
-  overflow: scroll;
+  overflow: auto;
 }
 </style>

@@ -4,10 +4,10 @@ export default {
 };
 </script>
 <script setup>
-import { ref, computed } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+import { orderFilterOptions, orderStatusOptions } from "@/data";
 import { getList, remove, update } from "@/utils/storage";
-import { orderFilterOptions, orderStatusOptions } from "@/data"
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 
 const value = ref("");
 const dataSource = ref(getList("orders"));
@@ -41,16 +41,25 @@ const changeStatus = (item, status) => {
 const jumpToEdit = (id) => {
   router.push(`/orders/create?id=${id}`)
 }
+
+const jumpToOverview = () => {
+  router.push("/orders/overview")
+}
 </script>
 
 <template>
   <van-nav-bar title="全部订单" />
-  <van-search v-model="value" placeholder="请输入搜索关键词" />
+  <van-search v-model="value" placeholder="请输入搜索关键词" show-action>
+    <template #action>
+      <div @click="jumpToOverview">汇总</div>
+    </template>
+  </van-search>
   <van-dropdown-menu>
     <van-dropdown-item v-model="filterKey" :options="options" />
     <van-dropdown-item v-model="filterOrderStatus" :options="optionsStatus" />
   </van-dropdown-menu>
-  <van-list class="goods-list">
+  <van-empty description="没有数据" v-if="!showData.length" />
+  <van-list class="goods-list" v-else>
     <van-swipe-cell v-for="(item, index) in showData" :key="item">
       <van-cell :class="{ completed: item.status === 'completed' }" :border="true" @click="() => jumpToEdit(item.id)"
         :label="`${item.person}- ${item.date}`" :title="item.goodsName">
@@ -63,15 +72,13 @@ const jumpToEdit = (id) => {
 
       <template #right>
         <van-button @click="() => deleteGoods(item.id)" square type="danger" text="删除" />
-        <van-button @click="() => changeStatus(item, 'completed')" square type="warning" text="完成" />
-        <van-button @click="() => changeStatus(item, 'processing')" type="success" text="未完成" />
+        <van-button @click="() => changeStatus(item, 'completed')" square type="success" text="完成" />
+        <van-button @click="() => changeStatus(item, 'processing')" type="warning" text="未完成" />
       </template>
     </van-swipe-cell>
   </van-list>
 
-  <RouterLink to="/orders/create">
-    <van-button class="add-button" icon="plus" type="primary" />
-  </RouterLink>
+  <van-button to="/orders/create" class="add-button" icon="plus" type="primary" />
 </template>
 
 <style>

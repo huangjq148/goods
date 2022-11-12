@@ -4,9 +4,10 @@ export default {
 };
 </script>
 <script setup>
-import { ref, computed } from "vue";
 import { getList, remove } from "@/utils/storage";
-import { RouterLink, useRouter } from "vue-router";
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import { AddressList } from 'vant';
 
 const value = ref("");
 const dataSource = ref(getList("persons"));
@@ -28,21 +29,36 @@ const jumpToEdit = (id) => {
 <template>
   <van-nav-bar title="全部联系人" />
   <van-search v-model="value" placeholder="请输入搜索关键词" />
-  <van-list class="goods-list">
-    <van-swipe-cell v-for="(item, index) in showData" :key="item">
-      <van-cell :border="true" :title="item.name" :value="item.address" @click="() => jumpToEdit(item.id)" />
-      <template #right>
-        <van-button @click="() => deletePerson(index)" square type="danger" text="删除" />
-      </template>
-    </van-swipe-cell>
-  </van-list>
 
-  <RouterLink to="/contact/create">
-    <van-button class="add-button" icon="plus" type="primary" />
-  </RouterLink>
+  <van-empty description="没有数据" v-if="!showData.length" />
+  <div class="van-address-list" v-else>
+    <van-list class="goods-list">
+      <van-swipe-cell v-for="(item, index) in showData" :key="item">
+        <!-- <van-cell :border="true" :title="item.name" :value="item.address"  /> -->
+        <div class="van-address-item address-wrapper">
+          <div class="info-wrapper">
+            <div class="van-address-item__name">
+              {{ item.name }} {{ item.phone }}
+            </div>
+            <div class="van-address-item__address">
+              {{ item.address }}
+            </div>
+          </div>
+          <div class="edit-warpper" @click="() => jumpToEdit(item.id)">
+            <van-icon name="edit" />
+          </div>
+        </div>
+        <template #right>
+          <van-button @click="() => deletePerson(index)" square type="danger" text="删除" />
+        </template>
+      </van-swipe-cell>
+    </van-list>
+  </div>
+
+  <van-button to="/contact/create" class="add-button" icon="plus" type="primary" />
 </template>
 
-<style>
+<style scoped>
 .add-button {
   border-radius: 50%;
   width: 40px;
@@ -54,6 +70,27 @@ const jumpToEdit = (id) => {
 
 .goods-list {
   margin-top: 1px;
+}
+
+.name {
+  font-size: 16px;
+}
+
+.address-wrapper {
+  display: flex;
+}
+
+.info-wrapper {
+  width: 100%;
+}
+
+.edit-warpper {
+  display: flex;
+  width: 60px;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  color: #999;
 }
 </style>
 ƒ
