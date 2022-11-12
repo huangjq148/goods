@@ -59,7 +59,7 @@ const jumpToOverview = () => {
     <van-dropdown-item v-model="filterOrderStatus" :options="optionsStatus" />
   </van-dropdown-menu>
   <van-empty description="没有数据" v-if="!showData.length" />
-  <van-list class="goods-list" v-else>
+  <van-list class="order-list" v-else>
     <van-swipe-cell v-for="(item, index) in showData" :key="item">
       <van-cell :class="{ completed: item.status === 'completed' }" :border="true" @click="() => jumpToEdit(item.id)"
         :label="`${item.person}- ${item.date}`" :title="item.goodsName">
@@ -91,8 +91,10 @@ const jumpToOverview = () => {
   right: 30px;
 }
 
-.goods-list {
+.order-list {
   margin-top: 1px;
+  height: calc(100vh - 46px - 54px - 48px - 50px);
+  overflow: auto;
 }
 
 .completed {

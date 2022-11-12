@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@rushstack/eslint-patch': ^1.1.4
+  '@vant/use': ^1.4.3
   '@vitejs/plugin-vue': ^3.0.3
   '@vue/eslint-config-prettier': ^7.0.0
   dayjs: ^1.11.6
@@ -17,6 +18,7 @@ specifiers:
   vue-router: ^4.1.5
 
 dependencies:
+  '@vant/use': 1.4.3
   dayjs: 1.11.6
   lodash-es: 4.17.21
   pinia: 2.0.23_vue@3.2.42
