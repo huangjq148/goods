@@ -127,7 +127,7 @@ const onClickRight = () => {
 thead {
     background-color: #bbb;
     position: sticky;
-    top: -2px;
+    top: 0;
     width: 100vw;
     z-index: 10;
 }
