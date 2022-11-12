@@ -5,23 +5,17 @@ export default {
 </script>
 <script setup>
 import { ref, computed } from "vue";
-import { RouterLink } from "vue-router";
-import { getList, subListItem, updateItem } from "@/utils/storage";
+import { RouterLink, useRouter } from "vue-router";
+import { getList, remove, update } from "@/utils/storage";
+import { orderFilterOptions, orderStatusOptions } from "@/data"
 
 const value = ref("");
 const dataSource = ref(getList("orders"));
 const filterKey = ref("goodsName");
 const filterOrderStatus = ref("");
-const options = ref([
-  { text: "根据品名搜索", value: "goodsName" },
-  { text: "根据姓名搜索", value: "person" },
-  { text: "根据日期搜索", value: "date" },
-]);
-const optionsStatus = ref([
-  { text: "全部", value: "" },
-  { text: "已完成", value: "completed" },
-  { text: "未完成", value: "processing" },
-]);
+const options = ref(orderFilterOptions);
+const optionsStatus = ref(orderStatusOptions);
+const router = useRouter()
 
 const showData = computed(() => {
   return dataSource.value
@@ -35,14 +29,18 @@ const showData = computed(() => {
     });
 });
 
-const deleteGoods = (index) => {
-  dataSource.value = subListItem("orders", index);
+const deleteGoods = (id) => {
+  dataSource.value = remove("orders", id);
 };
 
-const changeStatus = (index, item, status) => {
+const changeStatus = (item, status) => {
   item.status = status;
-  dataSource.value = updateItem("orders", index, item);
+  dataSource.value = update("orders", item);
 };
+
+const jumpToEdit = (id) => {
+  router.push(`/orders/create?id=${id}`)
+}
 </script>
 
 <template>
@@ -54,38 +52,19 @@ const changeStatus = (index, item, status) => {
   </van-dropdown-menu>
   <van-list class="goods-list">
     <van-swipe-cell v-for="(item, index) in showData" :key="item">
-      <RouterLink :to="`/orders/create?index=${index}`">
-        <van-cell
-          :class="{ completed: item.status === 'completed' }"
-          :border="true"
-          :label="`${item.person}- ${item.date}`"
-          :title="item.goodsName"
-        >
-          进价：{{ item.buyPrice * item.number }} 售价：{{
+      <van-cell :class="{ completed: item.status === 'completed' }" :border="true" @click="() => jumpToEdit(item.id)"
+        :label="`${item.person}- ${item.date}`" :title="item.goodsName">
+        进价：{{ item.buyPrice * item.number }} 售价：{{
             item.sellPrice * item.number
-          }}
-          <br />
-          利润：{{ item.sellPrice * item.number - item.buyPrice * item.number }}
-        </van-cell>
-      </RouterLink>
+        }}
+        <br />
+        利润：{{ item.sellPrice * item.number - item.buyPrice * item.number }}
+      </van-cell>
+
       <template #right>
-        <van-button
-          @click="() => deleteGoods(index)"
-          square
-          type="danger"
-          text="删除"
-        />
-        <van-button
-          @click="() => changeStatus(index, item, 'completed')"
-          square
-          type="warning"
-          text="完成"
-        />
-        <van-button
-          @click="() => changeStatus(index, item, 'processing')"
-          type="success"
-          text="未完成"
-        />
+        <van-button @click="() => deleteGoods(item.id)" square type="danger" text="删除" />
+        <van-button @click="() => changeStatus(item, 'completed')" square type="warning" text="完成" />
+        <van-button @click="() => changeStatus(item, 'processing')" type="success" text="未完成" />
       </template>
     </van-swipe-cell>
   </van-list>

@@ -4,6 +4,7 @@ specifiers:
   '@rushstack/eslint-patch': ^1.1.4
   '@vitejs/plugin-vue': ^3.0.3
   '@vue/eslint-config-prettier': ^7.0.0
+  dayjs: ^1.11.6
   eslint: ^8.22.0
   eslint-plugin-vue: ^9.3.0
   lodash-es: ^4.17.21
@@ -16,6 +17,7 @@ specifiers:
   vue-router: ^4.1.5
 
 dependencies:
+  dayjs: 1.11.6
   lodash-es: 4.17.21
   pinia: 2.0.23_vue@3.2.42
   vant: 3.6.5_vue@3.2.42
@@ -411,6 +413,10 @@ packages:
 
   /csstype/2.6.21:
     resolution: {integrity: sha512-Z1PhmomIfypOpoMjRQB70jfvy/wxT50qW08YXO5lMIJkrdq4yOTR+AW7FqutScmB9NkLwxo+jU+kZLbofZZq/w==}
+
+  /dayjs/1.11.6:
+    resolution: {integrity: sha512-zZbY5giJAinCG+7AGaw0wIhNZ6J8AhWuSXKvuc1KAyMiRsvGQWqh4L+MomvhdAYjN+lqvVCMq1I41e3YHvXkyQ==}
+    dev: false
 
   /debug/4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}

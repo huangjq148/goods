@@ -5,60 +5,43 @@ export default {
 </script>
 <script setup>
 import { ref, onMounted } from "vue";
-import { addList } from "@/utils/storage";
+import { createOrUpdate, getById } from "@/utils/storage";
+import { useRoute } from "vue-router";
+
+const router = useRoute();
+const recordId = router.query.id
 const goodsInfo = ref({
   name: "",
   buyPrice: "",
   sellPrice: "",
 });
-const goods = ref([]);
 
 const onClickLeft = () => {
   history.back();
 };
 
 const onSubmit = () => {
-  addList("goods", goodsInfo.value);
+  createOrUpdate("goods", goodsInfo.value)
   onClickLeft();
 };
 
 onMounted(() => {
-  const dataStr = localStorage.getItem("goods") ?? "[]";
-  goods.value = JSON.parse(dataStr);
+  if (recordId) {
+    goodsInfo.value = getById("goods", recordId);
+  }
 });
 </script>
 
 <template>
-  <van-nav-bar
-    title="新增商品"
-    left-text="返回"
-    left-arrow
-    @click-left="onClickLeft"
-  />
+  <van-nav-bar :title="recordId ? '编辑商品' : '新增商品'" left-text="返回" left-arrow @click-left="onClickLeft" />
   <van-form @submit="onSubmit" class="form">
     <van-cell-group inset>
-      <van-field
-        v-model="goodsInfo.name"
-        name="品名"
-        label="品名"
-        placeholder="品名"
-        :rules="[{ required: true, message: '请填写品名' }]"
-      />
-      <van-field
-        v-model="goodsInfo.buyPrice"
-        name="成本"
-        label="成本"
-        placeholder="成本"
-        type="number"
-        :rules="[{ required: true, message: '请填写成本' }]"
-      />
-      <van-field
-        v-model="goodsInfo.sellPrice"
-        name="售价"
-        label="售价"
-        placeholder="售价"
-        :rules="[{ required: true, message: '请填写售价' }]"
-      />
+      <van-field v-model="goodsInfo.name" name="品名" label="品名" placeholder="品名"
+        :rules="[{ required: true, message: '请填写品名' }]" />
+      <van-field v-model="goodsInfo.buyPrice" name="成本" label="成本" placeholder="成本" type="number"
+        :rules="[{ required: true, message: '请填写成本' }]" />
+      <van-field v-model="goodsInfo.sellPrice" name="售价" label="售价" placeholder="售价"
+        :rules="[{ required: true, message: '请填写售价' }]" />
       <div style="margin: 16px">
         <van-button round block type="primary" native-type="submit">
           提交
