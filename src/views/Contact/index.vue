@@ -31,10 +31,9 @@ const jumpToEdit = (id) => {
   <van-search v-model="value" placeholder="请输入搜索关键词" />
 
   <van-empty description="没有数据" v-if="!showData.length" />
-  <div class="van-address-list" v-else>
-    <van-list class="goods-list">
+  <div class="van-address-list address-list" v-else>
+    <van-list>
       <van-swipe-cell v-for="(item, index) in showData" :key="item">
-        <!-- <van-cell :border="true" :title="item.name" :value="item.address"  /> -->
         <div class="van-address-item address-wrapper">
           <div class="info-wrapper">
             <div class="van-address-item__name">
@@ -68,8 +67,13 @@ const jumpToEdit = (id) => {
   right: 30px;
 }
 
-.goods-list {
+.address-list {
   margin-top: 1px;
+  height: calc(100vh - 50px - 100px);
+  overflow: auto;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  box-sizing: border-box;
 }
 
 .name {
