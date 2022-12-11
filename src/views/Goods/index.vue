@@ -4,32 +4,67 @@ export default {
 };
 </script>
 <script setup>
-import { getList, remove } from "@/utils/storage";
-import { computed, ref } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
+import { queryProduct, deleteProduct as deleteGoodsById } from "@/services/product"
+
+const PAGE_SIZE = 15
 
 const value = ref("");
-const dataSource = ref(getList("goods"));
 const router = useRouter()
+const showData = ref([]);
+const loading = ref(false);
+const finished = ref(false);
+const current = ref(1);
 
-const showData = computed(() => {
-  return dataSource.value.filter(item => item.name.indexOf(value.value) > -1)
+watch(value, () => {
+  showData.value = []
+  onLoad({ name: value.value })
 })
 
-const deleteGoods = (id) => {
-  dataSource.value = remove("goods", id);
+const deleteGoods = async (id) => {
+  await deleteGoodsById(id)
+  showData.value = showData.value.filter(item => item.id != id)
 };
 
 const jumpToEdit = (id) => {
   router.push(`/goods/create?id=${id}`)
 }
+
+const onLoad = async (conditions) => {
+  let pageNumber = current.value++
+  if (conditions) {
+    pageNumber = 1
+    current.value = 1
+  } else {
+    conditions = {}
+  }
+
+  const { content } = await queryProduct({ current: pageNumber++, pageSize: PAGE_SIZE, ...conditions })
+
+  if (content) {
+    showData.value = showData.value.concat(content)
+    loading.value = false;
+
+    if (content?.length < 10) {
+      finished.value = true
+    }
+  } else {
+    finished.value = true
+  }
+}
+
+onMounted(() => {
+  onLoad()
+})
 </script>
 
 <template>
   <van-nav-bar title="全部商品" />
   <van-search v-model="value" placeholder="请输入搜索关键词" />
   <van-empty description="没有数据" v-if="!showData.length" />
-  <van-list class="goods-list" v-else>
+  <van-list class="goods-list" v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="onLoad"
+    v-else>
     <van-swipe-cell v-for="(item, index) in showData" :key="item">
       <van-cell :title="item.name" @click="() => jumpToEdit(item.id)">
         进价：{{ item.buyPrice }}

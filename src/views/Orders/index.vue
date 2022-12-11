@@ -6,7 +6,7 @@ export default {
 <script setup>
 import { orderFilterOptions, orderStatusOptions } from "@/data";
 import { getList } from "@/utils/storage";
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { utils, writeFile } from "xlsx"
 import dayjs from "dayjs"
@@ -24,13 +24,7 @@ const router = useRouter();
 const showData = ref([]);
 const loading = ref(false);
 const finished = ref(false);
-const current = ref(2);
-
-(async () => {
-  const { content } = await queryOrder({ current: 1, pageSize: PAGE_SIZE })
-  showData.value = content
-})()
-
+const current = ref(1);
 
 watch(value, (newValue) => {
   showData.value = []
@@ -143,8 +137,11 @@ const onLoad = async (conditions) => {
   } else {
     finished.value = true
   }
-
 }
+
+onMounted(() => {
+  onLoad()
+})
 </script>
 
 <template>

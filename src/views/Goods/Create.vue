@@ -5,8 +5,8 @@ export default {
 </script>
 <script setup>
 import { ref, onMounted } from "vue";
-import { createOrUpdate, getById } from "@/utils/storage";
 import { useRoute } from "vue-router";
+import { createProduct, queryProductById, updateProduct } from "@/services/product"
 
 const router = useRoute();
 const recordId = router.query.id
@@ -20,14 +20,18 @@ const onClickLeft = () => {
   history.back();
 };
 
-const onSubmit = () => {
-  createOrUpdate("goods", goodsInfo.value)
+const onSubmit = async () => {
+  if (recordId) {
+    await updateProduct(goodsInfo.value)
+  } else {
+    await createProduct(goodsInfo.value)
+  }
   onClickLeft();
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (recordId) {
-    goodsInfo.value = getById("goods", recordId);
+    goodsInfo.value = await queryProductById(recordId);
   }
 });
 </script>
