@@ -1,7 +1,6 @@
 export const orderFilterOptions = [
     { text: "根据品名搜索", value: "name" },
     { text: "根据姓名搜索", value: "contact" },
-    { text: "根据日期搜索", value: "orderTime" },
 ]
 
 export const orderStatusOptions = [

@@ -21,7 +21,7 @@ const logout = () => {
 <template>
     <van-nav-bar title="我" />
 
-    <van-cell-group inset>
+    <van-cell-group inset style="margin-top:10px;">
         <van-cell>
             <div>{{ userStore.user.name }}</div>
         </van-cell>

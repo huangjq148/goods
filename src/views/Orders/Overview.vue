@@ -4,30 +4,18 @@ export default {
 };
 </script>
 <script setup>
-import { orderFilterOptions, orderStatusOptions } from "@/data";
-import { ref, computed } from "vue";
-import { getList } from "@/utils/storage";
+import { ref, onMounted } from "vue";
 import { useToggle } from '@vant/use';
+import SearchFilter from "@/components/SearchFilter/index.vue"
+import { queryOrder } from "@/services/order"
+import dayjs from "dayjs"
+
 const [showCondition, toggle] = useToggle();
+const showData = ref([]);
 
-const value = ref("");
-const filterKey = ref("goodsName");
-const filterOrderStatus = ref("");
-const dataSource = ref(getList("orders"));
-const options = ref(orderFilterOptions);
-const optionsStatus = ref(orderStatusOptions);
-
-const showData = computed(() => {
-    return dataSource.value
-        .filter((item) => item[filterKey.value].indexOf(value.value) > -1)
-        .filter((item) => {
-            if (!filterOrderStatus.value) {
-                return true;
-            } else {
-                return item.status === filterOrderStatus.value;
-            }
-        });
-});
+const handleConditionChange = (values) => {
+    loadData(values)
+}
 
 const onClickLeft = () => {
     history.back();
@@ -36,6 +24,19 @@ const onClickLeft = () => {
 const onClickRight = () => {
     toggle()
 }
+
+const loadData = async (conditions = {}) => {
+    const { content } = await queryOrder({
+        current: 1,
+        pageSize: 1000,
+        ...conditions
+    })
+    showData.value = content ?? []
+}
+
+onMounted(() => {
+    loadData({ startCreateDate: dayjs().format("YYYY-MM-DD"), endCreateDate: dayjs().format("YYYY-MM-DD") });
+})
 </script>
 
 <template>
@@ -44,15 +45,7 @@ const onClickRight = () => {
             :right-text="showCondition ? '隐藏条件' : '显示条件'" @click-right="onClickRight" />
         <van-notice-bar class="tips" left-icon="volume-o" text="建议使用横屏查看" />
         <div v-show="showCondition">
-            <van-search v-model="value" placeholder="请输入搜索关键词" show-action>
-                <template #action>
-                    <div @click="jumpToOverview">汇总</div>
-                </template>
-            </van-search>
-            <van-dropdown-menu>
-                <van-dropdown-item v-model="filterKey" :options="options" />
-                <van-dropdown-item v-model="filterOrderStatus" :options="optionsStatus" />
-            </van-dropdown-menu>
+            <SearchFilter @conditionChange="handleConditionChange" />
         </div>
     </van-sticky>
     <van-empty description="没有数据" v-if="!showData.length" />
@@ -71,21 +64,23 @@ const onClickRight = () => {
                     <td>实收</td>
                     <td>进价</td>
                     <td>进价总额</td>
+                    <td>其他费用</td>
                     <td>毛利润</td>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, index) in showData" :key="item.id" :class="{ 'completed': item.status === 'completed' }">
+                <tr v-for="(item, index) in showData" :key="item.id" :class="{ 'completed': item.status === '2' }">
                     <td>{{ item.id }}</td>
-                    <td>{{ item.date }}</td>
-                    <td>{{ item.goodsName }}</td>
+                    <td>{{ item.orderTime }}</td>
+                    <td>{{ item.name }}</td>
                     <td>{{ item.number }}</td>
                     <td>{{ item.contact }}</td>
                     <td>{{ item.sellPrice }}</td>
                     <td>{{ item.sellPrice * item.number }}</td>
                     <td>{{ item.buyPrice }}</td>
                     <td>{{ item.buyPrice * item.number }}</td>
-                    <td>{{ item.sellPrice * item.number - item.buyPrice * item.number }}</td>
+                    <td>{{ item.otherCost }}</td>
+                    <td>{{ item.sellPrice * item.number - item.buyPrice * item.number - item.otherCost }}</td>
                 </tr>
             </tbody>
         </table>
@@ -129,7 +124,7 @@ thead {
     position: sticky;
     top: 0;
     width: 100vw;
-    z-index: 10;
+    z-index: 1;
 }
 
 tbody {
