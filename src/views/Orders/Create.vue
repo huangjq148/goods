@@ -4,10 +4,11 @@ export default {
 };
 </script>
 <script setup>
-import { ref, onMounted } from "vue";
-import { getList } from "@/utils/storage";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { createOrder, queryOrderById, updateOrder } from "@/services/order"
+import { queryProduct } from "@/services/product"
+import { queryContact } from "@/services/contact"
 
 const router = useRoute();
 const recordId = router.query.id
@@ -28,25 +29,48 @@ const orderInfo = ref({
   remark: "",
   otherCost: ""
 });
-const goodsList = getList("goods");
-const goodsColumns = goodsList.map(
-  (item) => `${item.name}-${item.buyPrice}-${item.sellPrice}`
-);
-const contactList = getList("contacts");
-const contactColumns = contactList.map((item) => `${item.name}-${item.address}`);
+const goodsList = ref([]);
+const contactList = ref([]);
+
+const goodsColumns = computed(() => {
+  return goodsList.value.map(item => `${item.name}-${item.buyPrice}-${item.sellPrice}`)
+})
+const contactColumns = computed(() => {
+  return contactList.value.map(item => `${item.name}-${item.address}`)
+})
 
 const handleGoodsPick = (value, index) => {
-  orderInfo.value.name = goodsList[index].name;
-  orderInfo.value.buyPrice = goodsList[index].buyPrice;
-  orderInfo.value.sellPrice = goodsList[index].sellPrice;
+  const goods = goodsList.value[index]
+
+  orderInfo.value.name = goods.name;
+  orderInfo.value.buyPrice = goods.buyPrice;
+  orderInfo.value.sellPrice = goods.sellPrice;
+
   goodsPickerShow.value = false;
 };
 
 const handleContactPick = (value, index) => {
-  orderInfo.value.contact = contactList[index].name;
-  orderInfo.value.address = contactList[index].address;
+  const contact = contactList.value[index]
+
+  orderInfo.value.contact = contact.name;
+  orderInfo.value.address = contact.address;
+
   contactPickerShow.value = false;
 };
+
+const handleSelectProductClick = async () => {
+  const { content } = await queryProduct({ current: 1, pageSize: 3000 })
+
+  goodsList.value = content
+  goodsPickerShow.value = true
+}
+
+const handleSelectContactClick = async () => {
+  const { content } = await queryContact({ current: 1, pageSize: 3000 })
+
+  contactList.value = content
+  contactPickerShow.value = true
+}
 
 const formatDate = (date) =>
   `${date.getYear() - 100}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -89,7 +113,7 @@ onMounted(async () => {
       <van-field v-model="orderInfo.name" center clearable label="品名" placeholder="请输入/选择产品" input-align="right"
         :rules="[{ required: true, message: '请输入/选择产品' }]">
         <template #button>
-          <van-button size="small" type="primary" @click="goodsPickerShow = true">
+          <van-button size="small" type="primary" @click="handleSelectProductClick">
             选择
           </van-button>
         </template>
@@ -98,17 +122,15 @@ onMounted(async () => {
       <van-field v-model="orderInfo.contact" center clearable label="收货人" placeholder="请输入/选择收货人" input-align="right"
         :rules="[{ required: true, message: '请填写收货人' }]">
         <template #button>
-          <van-button size="small" type="primary" @click="contactPickerShow = true">
+          <van-button size="small" type="primary" @click="handleSelectContactClick">
             选择
           </van-button>
         </template>
       </van-field>
 
-      <van-field input-align="right" v-model="orderInfo.address" label="地址" placeholder="收货地址"
-        :rules="[{ required: true, message: '请填写地址' }]" />
+      <van-field input-align="right" v-model="orderInfo.address" label="地址" placeholder="收货地址" />
 
-      <van-field input-align="right" v-model="orderInfo.phone" label="手机号" placeholder="手机号"
-        :rules="[{ required: true, message: '请填写手机号' }]" />
+      <van-field input-align="right" v-model="orderInfo.phone" label="手机号" placeholder="手机号" />
 
       <van-field input-align="right" v-model="orderInfo.buyPrice" label="成本" placeholder="成本" type="number"
         :rules="[{ required: true, message: '请填写成本' }]" />
@@ -119,8 +141,7 @@ onMounted(async () => {
       <van-field input-align="right" v-model="orderInfo.number" label="重量" placeholder="重量"
         :rules="[{ required: true, message: '请填写重量' }]" />
 
-      <van-field input-align="right" v-model="orderInfo.otherCost" label="其他费用" placeholder="其他费用"
-        :rules="[{ required: true, message: '请填写其他费用' }]" />
+      <van-field input-align="right" v-model="orderInfo.otherCost" label="其他费用" placeholder="其他费用" />
 
       <van-cell title="汇总">
         进价：{{ orderInfo.buyPrice * orderInfo.number }}
@@ -135,6 +156,7 @@ onMounted(async () => {
 
       <van-field input-align="right" v-model="orderInfo.remark" name="备注" label="备注" type="textarea" placeholder="备注"
         rows="1" autosize />
+
       <div style="margin: 16px">
         <van-button round block type="primary" native-type="submit">
           提交
