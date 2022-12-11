@@ -4,26 +4,59 @@ export default {
 };
 </script>
 <script setup>
-import { getList, remove } from "@/utils/storage";
-import { computed, ref } from "vue";
+import { watch, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { AddressList } from 'vant';
+import { queryContact, deleteContact as deleteContactById } from "@/services/contact"
+
+const PAGE_SIZE = 15
 
 const value = ref("");
-const dataSource = ref(getList("contacts"));
-const router = useRouter()
+const router = useRouter();
+const showData = ref([]);
+const loading = ref(false);
+const finished = ref(false);
+const current = ref(1);
 
-const showData = computed(() => {
-  return dataSource.value.filter(item => item.name.indexOf(value.value) > -1)
+watch(value, () => {
+  showData.value = []
+  onLoad({ name: value.value })
 })
 
-const deleteContact = (index) => {
-  dataSource.value = remove("contacts", index);
+const deleteContact = async (id) => {
+  await deleteContactById(id)
+  showData.value = showData.value.filter(item => item.id != id)
 };
 
 const jumpToEdit = (id) => {
   router.push(`/contact/create?id=${id}`)
 }
+
+const onLoad = async (conditions) => {
+  let pageNumber = current.value++
+  if (conditions) {
+    pageNumber = 1
+    current.value = 1
+  } else {
+    conditions = {}
+  }
+
+  const { content } = await queryContact({ current: pageNumber++, pageSize: PAGE_SIZE, ...conditions })
+
+  if (content) {
+    showData.value = showData.value.concat(content)
+    loading.value = false;
+
+    if (content?.length < 10) {
+      finished.value = true
+    }
+  } else {
+    finished.value = true
+  }
+}
+
+onMounted(() => {
+  onLoad()
+})
 </script>
 
 <template>
@@ -32,7 +65,7 @@ const jumpToEdit = (id) => {
 
   <van-empty description="没有数据" v-if="!showData.length" />
   <div class="van-address-list address-list" v-else>
-    <van-list>
+    <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
       <van-swipe-cell v-for="(item, index) in showData" :key="item">
         <div class="van-address-item address-wrapper">
           <div class="info-wrapper">
@@ -48,7 +81,7 @@ const jumpToEdit = (id) => {
           </div>
         </div>
         <template #right>
-          <van-button @click="() => deleteContact(index)" square type="danger" text="删除" />
+          <van-button @click="() => deleteContact(item.id)" square type="danger" text="删除" />
         </template>
       </van-swipe-cell>
     </van-list>

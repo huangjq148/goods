@@ -5,8 +5,9 @@ export default {
 </script>
 <script setup>
 import { ref, onMounted } from "vue";
-import { createOrUpdate, getById } from "@/utils/storage";
 import { useRoute } from "vue-router";
+import { createContact, queryContactById, updateContact } from "@/services/contact"
+
 
 const router = useRoute();
 const recordId = router.query.id
@@ -20,14 +21,18 @@ const onClickLeft = () => {
     history.back();
 };
 
-const onSubmit = () => {
-    createOrUpdate("contacts", contactInfo.value)
+const onSubmit = async () => {
+    if (recordId) {
+        await updateContact(contactInfo.value)
+    } else {
+        await createContact(contactInfo.value)
+    }
     onClickLeft();
 };
 
-onMounted(() => {
+onMounted(async () => {
     if (recordId) {
-        contactInfo.value = getById("contacts", recordId);
+        contactInfo.value = await queryContactById(recordId);
     }
 });
 </script>
