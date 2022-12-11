@@ -1,0 +1,1 @@
+import{p as r}from"./index.29382301.js";const c=async t=>r("/product",{method:"POST",data:t}),e=async t=>r("/product",{method:"GET",params:t}),u=async t=>r(`/product/${t}`,{method:"GET"}),d=async t=>r("/product",{method:"PATCH",data:t}),s=async t=>r(`/product/${t}`,{method:"DELETE"});export{u as a,c,s as d,e as q,d as u};

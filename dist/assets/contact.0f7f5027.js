@@ -1,0 +1,1 @@
+import{p as c}from"./index.29382301.js";const n=async t=>c("/contact",{method:"POST",data:t}),o=async t=>c("/contact",{method:"GET",params:t}),e=async t=>c(`/contact/${t}`,{method:"GET"}),r=async t=>c("/contact",{method:"PATCH",data:t}),s=async t=>c(`/contact/${t}`,{method:"DELETE"});export{e as a,n as c,s as d,o as q,r as u};
