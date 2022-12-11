@@ -10,15 +10,15 @@ import { useRouter } from "vue-router";
 import { AddressList } from 'vant';
 
 const value = ref("");
-const dataSource = ref(getList("persons"));
+const dataSource = ref(getList("contacts"));
 const router = useRouter()
 
 const showData = computed(() => {
   return dataSource.value.filter(item => item.name.indexOf(value.value) > -1)
 })
 
-const deletePerson = (index) => {
-  dataSource.value = remove("persons", index);
+const deleteContact = (index) => {
+  dataSource.value = remove("contacts", index);
 };
 
 const jumpToEdit = (id) => {
@@ -48,7 +48,7 @@ const jumpToEdit = (id) => {
           </div>
         </div>
         <template #right>
-          <van-button @click="() => deletePerson(index)" square type="danger" text="删除" />
+          <van-button @click="() => deleteContact(index)" square type="danger" text="删除" />
         </template>
       </van-swipe-cell>
     </van-list>

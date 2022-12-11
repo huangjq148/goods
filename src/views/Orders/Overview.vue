@@ -75,12 +75,12 @@ const onClickRight = () => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, index) in showData" :key="item.id" :class="{'completed':item.status==='completed'}">
+                <tr v-for="(item, index) in showData" :key="item.id" :class="{ 'completed': item.status === 'completed' }">
                     <td>{{ item.id }}</td>
                     <td>{{ item.date }}</td>
                     <td>{{ item.goodsName }}</td>
                     <td>{{ item.number }}</td>
-                    <td>{{ item.person }}</td>
+                    <td>{{ item.contact }}</td>
                     <td>{{ item.sellPrice }}</td>
                     <td>{{ item.sellPrice * item.number }}</td>
                     <td>{{ item.buyPrice }}</td>
@@ -137,6 +137,6 @@ tbody {
 }
 
 .completed {
-  background-color: rgb(212, 255, 204);
+    background-color: rgb(212, 255, 204);
 }
 </style>

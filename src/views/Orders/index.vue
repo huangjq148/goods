@@ -5,39 +5,52 @@ export default {
 </script>
 <script setup>
 import { orderFilterOptions, orderStatusOptions } from "@/data";
-import { getList, remove, update } from "@/utils/storage";
-import { computed, ref } from "vue";
+import { getList } from "@/utils/storage";
+import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { utils, writeFile } from "xlsx"
 import dayjs from "dayjs"
+import { queryOrder, changeOrderStatus, deleteOrder } from "@/services/order"
+
+const PAGE_SIZE = 15
 
 const value = ref("");
 const dataSource = ref(getList("orders"));
-const filterKey = ref("goodsName");
+const filterKey = ref("name");
 const filterOrderStatus = ref("");
 const options = ref(orderFilterOptions);
 const optionsStatus = ref(orderStatusOptions);
-const router = useRouter()
+const router = useRouter();
+const showData = ref([]);
+const loading = ref(false);
+const finished = ref(false);
+const current = ref(2);
 
-const showData = computed(() => {
-  return dataSource.value
-    .filter((item) => item[filterKey.value].indexOf(value.value) > -1)
-    .filter((item) => {
-      if (!filterOrderStatus.value) {
-        return true;
-      } else {
-        return item.status === filterOrderStatus.value;
-      }
-    });
-});
+(async () => {
+  const { content } = await queryOrder({ current: 1, pageSize: PAGE_SIZE })
+  showData.value = content
+})()
 
-const deleteGoods = (id) => {
-  dataSource.value = remove("orders", id);
+
+watch(value, (newValue) => {
+  showData.value = []
+  onLoad({ [filterKey.value]: newValue })
+})
+
+watch(filterKey, (newValue) => {
+  showData.value = []
+  onLoad({ [newValue]: value.value })
+})
+
+const deleteOrderById = async (id) => {
+  await deleteOrder(id)
+  showData.value = showData.value.filter(item => item.id != id)
 };
 
-const changeStatus = (item, status) => {
-  item.status = status;
-  dataSource.value = update("orders", item);
+const changeStatus = async (id, status) => {
+  await changeOrderStatus(id, status)
+  const data = showData.value.find(item => item.id === id)
+  data.status = status
 };
 
 const jumpToEdit = (id) => {
@@ -55,13 +68,13 @@ const addProcessingOrderData = (workbook) => {
     "goodsName": item.goodsName,
     "number": item.number,
     "remark": item.remark,
-    "person": item.person,
+    "contact": item.contact,
     "address": item.address,
     "sellPrice": item.sellPrice,
     "buyPrice": item.buyPrice,
   }))
-  const sheetHeader = ["id", "date", "goodsName", "number", "remark", "person", "address", "sellPrice", "buyPrice"]
-  const headerDisplay = { id: "订单号", date: "日期", goodsName: "产品", number: "重量（斤）", remark: "特殊要求", person: "收货人", address: "收货地址", sellPrice: "单价", buyPrice: "进价" }
+  const sheetHeader = ["id", "date", "goodsName", "number", "remark", "contact", "address", "sellPrice", "buyPrice"]
+  const headerDisplay = { id: "订单号", date: "日期", goodsName: "产品", number: "重量（斤）", remark: "特殊要求", contact: "收货人", address: "收货地址", sellPrice: "单价", buyPrice: "进价" }
   var sheet = utils.json_to_sheet([headerDisplay, ...jsonData], { skipHeader: true, header: sheetHeader })
   sheet['!cols'] = [{ width: 20 }, { width: 15 }, { width: 20 }, { width: 10 }, { width: 15 }, { width: 15 }, { width: 40 }, { width: 10 }, { width: 10 }];
   utils.book_append_sheet(workbook, sheet, "送货单")
@@ -108,6 +121,30 @@ const onExportClick = () => {
   addGoodsData(workbook)
   writeFile(workbook, `渔-${dayjs().format('YYYYMMDD')}.xlsx`);
 }
+
+const onLoad = async (conditions) => {
+  let pageNumber = current.value++
+  if (conditions) {
+    pageNumber = 1
+    current.value = 1
+  } else {
+    conditions = {}
+  }
+
+  const { content } = await queryOrder({ current: pageNumber++, pageSize: PAGE_SIZE, ...conditions })
+
+  if (content) {
+    showData.value = showData.value.concat(content)
+    loading.value = false;
+
+    if (content?.length < 10) {
+      finished.value = true
+    }
+  } else {
+    finished.value = true
+  }
+
+}
 </script>
 
 <template>
@@ -122,10 +159,11 @@ const onExportClick = () => {
     <van-dropdown-item v-model="filterOrderStatus" :options="optionsStatus" />
   </van-dropdown-menu>
   <van-empty description="没有数据" v-if="!showData.length" />
-  <van-list class="order-list" v-else>
-    <van-swipe-cell v-for="(item, index) in showData" :key="item">
-      <van-cell :class="{ completed: item.status === 'completed' }" :border="true" @click="() => jumpToEdit(item.id)"
-        :label="`${item.person}- ${item.date}`" :title="item.goodsName">
+  <van-list class="order-list" v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="onLoad"
+    v-else>
+    <van-swipe-cell v-for="(item, index) in showData" :key="item.id">
+      <van-cell :class="{ completed: item.status === '2' }" :border="true" @click="() => jumpToEdit(item.id)"
+        :label="`${item.contact}- ${item.orderTime}`" :title="item.name">
         进价：{{ item.buyPrice * item.number }} 售价：{{
             item.sellPrice * item.number
         }}
@@ -134,9 +172,9 @@ const onExportClick = () => {
       </van-cell>
 
       <template #right>
-        <van-button @click="() => deleteGoods(item.id)" square type="danger" text="删除" />
-        <van-button @click="() => changeStatus(item, 'completed')" square type="success" text="完成" />
-        <van-button @click="() => changeStatus(item, 'processing')" type="warning" text="未完成" />
+        <van-button @click="() => deleteOrderById(item.id)" square type="danger" text="删除" />
+        <van-button @click="() => changeStatus(item.id, '2')" square type="success" text="完成" />
+        <van-button @click="() => changeStatus(item.id, '1')" type="warning" text="未完成" />
       </template>
     </van-swipe-cell>
   </van-list>
